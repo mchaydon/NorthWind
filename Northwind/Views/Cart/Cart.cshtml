@@ -38,10 +38,34 @@
     </tbody>
 </table>
 
+<p><a href="#" id="submit" class="btn btn-primary btn-lg">Submit</a></p>
+
 @section scripts
 {
     <script>
         $(function (e) {
+            $('#submit').click(function (e) {
+                var ProductID = $(this).attr('name');
+                var CustomerID = 1;
+                var qty = Number($(this).val());
+
+                var URL = "@Url.Content("~")Cart/SumbitOrder";
+                $.post(URL, {
+                    ProductID: ProductID, CustomerID: CustomerID, Quantity: qty
+                })
+                 .always(function( data, textStatus, statusObject ) {
+                     if(statusObject.status == 200){
+                         // success
+                         console.log($('#name_' + ProductID).html() + ' removed from cart')
+                     } else {
+                         // error
+                         console.log("Http response code: " + data.status);
+                         console.log("Http response: " + data.statusText);
+                         12
+                     }
+                 });
+            });
+
             $('.remove').click(function (e) {
                 var ProductID = $(this).attr('name');
                 var CustomerID = 1;

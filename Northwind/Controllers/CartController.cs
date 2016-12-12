@@ -108,6 +108,39 @@ namespace Northwind.Controllers
             return Json(sc, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult SumbitOrder(CartDTO cartDTO)
+        {
+            if (!ModelState.IsValid)
+            {
+                Response.StatusCode = 400;
+                return Json(new { }, JsonRequestBehavior.AllowGet);
+            }
+            // create cart item from Json object
+            Order_Detail od = new Order_Detail();
+            Cart sc = new Cart();
+            sc.ProductID = cartDTO.ProductID;
+            sc.CustomerID = cartDTO.CustomerID;
+            sc.Quantity = cartDTO.Quantity;
+            using (NorthwindEntities db = new NorthwindEntities())
+            {
+                // remove all items from the cart where customerID equals submitted customerID
+                List<Cart> cart = db.Carts.Include("Product").Include("Customer").Where(c => c.CustomerID == sc.CustomerID).ToList();
+                Order order = new Order();
+                order.CustomerID = sc.CustomerID;
+
+                foreach (Cart c in cart)
+                {
+                    c.Product.UnitsInStock -= Convert.ToInt16(sc.Quantity);
+                    db.Carts.Remove(c);
+                }
+                db.Orders.Add(order);   
+                db.SaveChanges();
+            }
+            return Json(sc, JsonRequestBehavior.AllowGet);
+        }
+
+
+
         public ActionResult Cart()
         {
             using (NorthwindEntities db = new NorthwindEntities())
